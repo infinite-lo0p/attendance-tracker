@@ -1,6 +1,17 @@
 {
-    "Python Programming": {
+    "Tut Batch 2-Linear Algebra": {
         "present": 1,
-        "total": 1
+        "total": 1,
+        "type": "tutorial"
+    },
+    "Engg Physics": {
+        "present": 1,
+        "total": 1,
+        "type": "lab"
+    },
+    "AEIoT - Applied Electronics And IoT": {
+        "present": 1,
+        "total": 1,
+        "type": "theory"
     }
 }
