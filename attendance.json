@@ -1,17 +1,17 @@
 {
-    "Tut Batch 2-Linear Algebra": {
-        "present": 1,
-        "total": 1,
-        "type": "tutorial"
-    },
-    "Engg Physics": {
-        "present": 1,
-        "total": 1,
-        "type": "lab"
-    },
-    "AEIoT - Applied Electronics And IoT": {
-        "present": 1,
-        "total": 1,
-        "type": "theory"
-    }
+  "Tut Batch 2-Linear Algebra": {
+    "present": 4,
+    "total": 4,
+    "type": "tutorial"
+  },
+  "Engg Physics": {
+    "present": 3,
+    "total": 3,
+    "type": "lab"
+  },
+  "AEIoT - Applied Electronics And IoT": {
+    "present": 3,
+    "total": 3,
+    "type": "theory"
+  }
 }
