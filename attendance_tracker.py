@@ -4,20 +4,11 @@ from datetime import datetime
 from rich import print as rprint
 from rich.table import Table
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 from timetable import TIMETABLE
 
 console = Console()
 DATA_FILE = "attendance.json"
-WEEKDAYS = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-]
 
 
 def load_data():
@@ -33,17 +24,6 @@ def save_data(data):
         json.dump(data, f, indent=4)
 
 
-def get_today_classes():
-    today = datetime.now().strftime("%A")
-    time_now = datetime.now().strftime("%H:%M")
-    classes = TIMETABLE.get(today, {})
-    return [
-        (slot, info)
-        for slot, info in classes.items()
-        if slot.split("-")[0] <= time_now <= slot.split("-")[1][:-3]
-    ]
-
-
 def mark_today(data):
     today = datetime.now().strftime("%A")
     classes = TIMETABLE.get(today, {})
@@ -51,21 +31,36 @@ def mark_today(data):
         rprint("[yellow]No classes today. Chill![/yellow]")
         return
 
-    rprint(f"[bold blue]Today: {today} | {len(classes)} classes[/bold blue]\n")
+    rprint(f"[bold blue]Today: {today} | {len(classes)} sessions[/bold blue]\n")
     for slot, info in classes.items():
-        name = info["name"]
-        if "LAB" in name or "Tut" in name:
-            name = name.split("-")[1].strip() if "LAB" in name else name
-        if name not in data:
-            data[name] = {"present": 0, "total": 0, "type": info["type"]}
+        display_name = info["display_name"]
+        type_ = info["type"]
 
-        rprint(f"[dim]{slot}[/dim] → [bold]{name}[/bold] ({info['type']})")
-        present = Confirm.ask("  Present?")
-        data[name]["total"] += 1
-        if present:
-            data[name]["present"] += 1
+        if display_name not in data:
+            data[display_name] = {"present": 0, "total": 0, "type": type_}
+
+        rprint(f"[dim]{slot}[/dim] → [bold]{display_name}[/bold] ({type_})")
+
+        # Ask with y/n/c
+        choice = Prompt.ask(
+            "  [green]y[/green]=Present  [red]n[/red]=Absent  [yellow]c[/yellow]=Cancelled",
+            choices=["y", "n", "c"],
+            default="y",
+        )
+
+        if choice == "c":
+            rprint("    [yellow]Cancelled — not counted[/yellow]")
+            continue  # Skip total
+        else:
+            data[display_name]["total"] += 1
+            if choice == "y":
+                data[display_name]["present"] += 1
+                rprint("    [green]Present ✓[/green]")
+            else:
+                rprint("    [red]Absent ✗[/red]")
+
     save_data(data)
-    rprint("\n[green]All classes marked![/green]")
+    rprint("\n[bold green]All done! Attendance saved.[/bold green]")
 
 
 def show_report(data):
@@ -78,17 +73,13 @@ def show_report(data):
     table.add_column("%", justify="right")
     table.add_column("Status", justify="center")
 
-    for name, rec in data.items():
+    for name, rec in sorted(data.items(), key=lambda x: x[1]["type"]):
         if rec["total"] == 0:
             continue
         perc = (rec["present"] / rec["total"]) * 100
         status = "[green]SAFE[/green]" if perc >= 75 else "[bold red]DANGER![/bold red]"
-        type_emoji = (
-            "Theory"
-            if rec["type"] == "theory"
-            else "Lab"
-            if rec["type"] == "lab"
-            else "Tut"
+        type_emoji = {"theory": "Lecture", "lab": "Lab", "tutorial": "Tutorial"}.get(
+            rec["type"], "Unknown"
         )
         table.add_row(
             name, type_emoji, f"{rec['present']}/{rec['total']}", f"{perc:.1f}", status
@@ -101,12 +92,12 @@ def show_report(data):
 
 def main():
     data = load_data()
-    rprint("[bold underline blue]COEP Attendance Tracker v2.0[/bold underline blue]")
-    rprint("[italic]Smart. Fast. Built for COEP.[/italic]\n")
+    rprint("[bold underline blue]COEP Attendance Tracker v2.2[/bold underline blue]")
+    rprint("[italic]Now with [yellow]Cancelled[/yellow] classes support[/italic]\n")
 
     while True:
         rprint("[bold]Menu:[/bold]")
-        rprint("   [1] Mark Today's Classes (Auto)")
+        rprint("   [1] Mark Today's Classes")
         rprint("   [2] View Full Report")
         rprint("   [3] Exit")
         choice = Prompt.ask("Choose", choices=["1", "2", "3"], default="1")

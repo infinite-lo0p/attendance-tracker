@@ -9,7 +9,6 @@ Built by a **COEP CSE '29** first-year who hates manual tracking.
 ## Features
 - **Auto "Mark Today"** — no typing subjects
 - **2-hour labs = 1 attendance**
-- Clean names: `Python Programming`, not `LAB Batch 4-PP-...`
 - Color-coded report with **SAFE / DANGER!**
 - Persistent `attendance.json`
 - Powered by [`rich`](https://github.com/Textualize/rich)
